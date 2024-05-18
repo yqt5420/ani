@@ -1,23 +1,23 @@
-name: tqest ani
+name: tqest ani 
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天UTC时间的午夜零点触发
+    - cron: '0 0 * * *'  # 每天UTC时间的午夜运行
 
 jobs:
-  run_python_script:
+  my_job:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'  # 选择你的Python版本
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11' 
 
-    - run: pip install requests 
-
+      - name: Run Python script
+        run: python ani.py
 
       
