@@ -1,0 +1,24 @@
+name: My Workflow12
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天UTC时间的午夜运行
+
+jobs:
+  my_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install requests library
+        run: python -m pip install requests
+
+      - name: Run Python script
+        run: python ani.py
