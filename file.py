@@ -28,7 +28,6 @@ def get_token():
 
 
 def upload_file(file_path, token):
-   # 监控文件夹关键字
    tmp = file_path.split(path_key)[-1]
    os_name = platform.system()
    if os_name == 'Windows':
