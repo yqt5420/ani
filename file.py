@@ -7,9 +7,9 @@ import requests
 import json
 import urllib.parse as parse
 
-alist_username = "admin"
-alist_password = "A12345678a"
-alist_url = "http://us.247200.xyz:5244"
+alist_username = ""
+alist_password = ""
+alist_url = ""
 listen_path = "/root/pan/Bangumi"
 path_key = "Bangumi"
 pan_driver='/Anime'
