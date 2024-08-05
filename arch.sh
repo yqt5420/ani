@@ -3,7 +3,7 @@
 #从这里开始是换源操作，封装成一个函数，让他可以重复执行
 ## --------------------------pacman操作---------------------------------- ##
 ## 更换国内源
-echo 'start开始换国内源'
+echo 'Server = https://mirrors.cernet.edu.cn/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.bfsu.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
@@ -21,11 +21,16 @@ echo ' ' >> /etc/pacman.conf
 echo '[archlinuxcn]' >> /etc/pacman.conf
 echo 'SigLevel = Never' >> /etc/pacman.conf
 echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch' >> /etc/pacman.conf
+
+
 ## -------------------------------------------------------------- ##
+
 ## 增加arch4edu源
 echo '[arch4edu]' >> /etc/pacman.conf
 echo 'SigLevel = Never' >> /etc/pacman.conf
 echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /etc/pacman.conf
+
+## -------------------------------------------------------------- ##
 ## 开启pacman颜色支持
 sed -i 's/#Color/Color/g' /etc/pacman.conf
 echo '换源操作结束stop'
