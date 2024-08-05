@@ -31,3 +31,6 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# 安装yay、网络管理工具
+pacman -Sy --need yay networkmanager
