@@ -3,8 +3,8 @@
 #从这里开始是换源操作，封装成一个函数，让他可以重复执行
 ## --------------------------pacman操作---------------------------------- ##
 ## 更换国内源
-echo 'Server = https://mirrors.cernet.edu.cn/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo 'start开始换国内源'
+echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.bfsu.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
@@ -21,16 +21,11 @@ echo ' ' >> /etc/pacman.conf
 echo '[archlinuxcn]' >> /etc/pacman.conf
 echo 'SigLevel = Never' >> /etc/pacman.conf
 echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch' >> /etc/pacman.conf
-
-
 ## -------------------------------------------------------------- ##
-
 ## 增加arch4edu源
 echo '[arch4edu]' >> /etc/pacman.conf
 echo 'SigLevel = Never' >> /etc/pacman.conf
 echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /etc/pacman.conf
-
-## -------------------------------------------------------------- ##
 ## 开启pacman颜色支持
 sed -i 's/#Color/Color/g' /etc/pacman.conf
 echo '换源操作结束stop'
@@ -75,7 +70,7 @@ mkfs.btrfs -f -L aw "$root_dir"
 mount -t btrfs -o compress=lzo "$root_dir" /mnt
 btrfs subvolume create /mnt/@ 
 btrfs subvolume create /mnt/@home 
-umount /mnt
+umount -R /mnt
 # 挂载根分区
 mount -t btrfs -o subvol=/@,compress=lzo "$root_dir" /mnt
 # 挂载 /home 子卷
@@ -91,7 +86,7 @@ mount "$boot_dir" /mnt/boot
 pacstrap /mnt base base-devel linux linux-firmware btrfs-progs intel-ucode amd-ucode
 
 # 安装常用软件
-pacstrap /mnt networkmanager vim sudo fish git wget nano htop neofetch yay openssh screen wireless-regdb wireless_tools wpa_supplicant cronie wqy-zenhei timeshift grub efibootmgr os-prober 
+pacstrap /mnt archlinuxcn-keyring archlinux-keyring archlinux-keyring networkmanager vim sudo fish git wget nano htop neofetch yay openssh screen wireless-regdb wireless_tools wpa_supplicant cronie wqy-zenhei timeshift grub efibootmgr os-prober 
 # 引导程序
   
 # 安装中文字体
@@ -185,16 +180,13 @@ echo 'Arch基础系统安装完成！'
 systemctl enable NetworkManager
 systemctl enable sshd
 systemctl enable cronie
+
+#安装输入法
 su aw
 yay -Sy --need --noconfirm fcitx5 fcitx5-chinese-addons fcitx5-pinyin-moegirl fcitx5-material-color
-yay -Sy --need --noconfirm xorg-xwayland qt5-wayland qt6-wayland glfw-wayland
-yay -Sy --need --noconfirm pacman gdm
-yay -Sy --need --noconfirm gnome gnome-tweaks nautilus-sendto gnome-nettool gnome-usage gnome-multi-writer adwaita-icon-theme xdg-user-dirs-gtk fwupd arc-gtk-theme
-sudo systemctl enable gdm
-EOFe
+EOF
 # 使用 exit 命令退出 arch-chroot 环境
 exit
 umount -R /mnt
-
 
 
