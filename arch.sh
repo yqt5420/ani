@@ -86,7 +86,7 @@ mount "$boot_dir" /mnt/boot
 pacstrap /mnt base base-devel linux linux-firmware btrfs-progs intel-ucode amd-ucode
 
 # 安装常用软件
-pacstrap /mnt archlinuxcn-keyring archlinux-keyring archlinux-keyring networkmanager vim sudo fish git wget nano htop neofetch yay openssh screen wireless-regdb wireless_tools wpa_supplicant cronie wqy-zenhei timeshift grub efibootmgr os-prober 
+pacstrap /mnt networkmanager vim sudo fish git wget nano htop neofetch yay openssh screen wireless-regdb wireless_tools wpa_supplicant cronie wqy-zenhei timeshift grub efibootmgr os-prober 
 # 引导程序
   
 # 安装中文字体
@@ -129,6 +129,7 @@ echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /etc/pacm
 sed -i 's/#Color/Color/g' /etc/pacman.conf
 echo '换源操作结束stop'
 
+
 #设置系统语言为中文
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen
@@ -167,16 +168,22 @@ sed -i 's/#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/g' /etc/def
 #生成grub配置文件
 grub-mkconfig -o /boot/grub/grub.cfg
 
+# 安装gnome桌面环境、ibus输入法
+pacman -S --noconfirm gnome sdm ibus-libpinyin 
+#安装火狐浏览器
+pacman -S --noconfirm firefox firefox-i18n-zh-cn
+
 echo 'Arch基础系统安装完成！'
 # 设置开机自启的任务
 # 设置网络开机自启
 systemctl enable NetworkManager
 systemctl enable sshd
 systemctl enable cronie
+systemctl enable sdm
+# 安装archlinuxcn-keyring
+pacman -S --noconfirm archlinuxcn-keyring archlinux-keyring arch4edu-keyring
 
-#安装输入法
-su aw
-yay -Sy --need --noconfirm fcitx5 fcitx5-chinese-addons fcitx5-pinyin-moegirl fcitx5-material-color
+
 EOF
 # 使用 exit 命令退出 arch-chroot 环境
 exit
