@@ -33,4 +33,4 @@ locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 # 安装yay、网络管理工具
-pacman -Sy --need yay networkmanager
+pacman -Sy --need -y yay networkmanager
