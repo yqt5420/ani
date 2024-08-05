@@ -129,13 +129,6 @@ echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /etc/pacm
 sed -i 's/#Color/Color/g' /etc/pacman.conf
 echo '换源操作结束stop'
 
-# 添加密钥
-pacman-key --init 
-pacman-key --populate archlinux
-pacman -Syy
-pacman -S archlinuxcn-keyring arch4edu-keyring
-pacman -Syy
-
 #设置系统语言为中文
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen
