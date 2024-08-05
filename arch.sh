@@ -180,10 +180,16 @@ echo 'Arch基础系统安装完成！'
 systemctl enable NetworkManager
 systemctl enable sshd
 systemctl enable cronie
+su aw
+yay -Sy --need --noconfirm fcitx5 fcitx5-chinese-addons fcitx5-pinyin-moegirl fcitx5-material-color
+yay -Sy --need --noconfirm xorg-xwayland qt5-wayland qt6-wayland glfw-wayland
+yay -Sy --need --noconfirm pacman gdm
+yay -Sy --need --noconfirm gnome gnome-tweaks nautilus-sendto gnome-nettool gnome-usage gnome-multi-writer adwaita-icon-theme xdg-user-dirs-gtk fwupd arc-gtk-theme
+sudo systemctl enable gdm
 EOFe
 # 使用 exit 命令退出 arch-chroot 环境
 exit
 umount -R /mnt
-reboot
+
 
 
