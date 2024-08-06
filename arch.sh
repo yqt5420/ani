@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 #从这里开始是换源操作，封装成一个函数，让他可以重复执行
 ## --------------------------pacman操作---------------------------------- ##
@@ -73,6 +73,7 @@ btrfs subvolume create /mnt/@home
 umount -R /mnt
 # 挂载根分区
 mount -t btrfs -o subvol=/@,compress=lzo "$root_dir" /mnt
+mkdir -p /mnt/{boot,home}
 # 挂载 /home 子卷
 mount -t btrfs -o subvol=/@home,compress=lzo "$root_dir" /mnt/home
 # 挂载 boot 分区
@@ -83,110 +84,111 @@ mount "$boot_dir" /mnt/boot
 
 ## -------------------------------------------------------------- ##
 # 给新系统安装基础软件
-pacstrap /mnt base base-devel linux linux-firmware btrfs-progs intel-ucode amd-ucode
-
+pacstrap /mnt base base-devel linux linux-firmware btrfs-progs 
+sleep 5
+pacstrap /mnt intel-ucode amd-ucode
+sleep 3
 # 安装常用软件
 pacstrap /mnt networkmanager vim sudo fish git wget nano htop neofetch yay openssh screen wireless-regdb wireless_tools wpa_supplicant cronie wqy-zenhei timeshift grub efibootmgr os-prober 
 # 引导程序
   
 # 安装中文字体
 ## -------------------------------------------------------------- ##
+######################################################################
+##############复制生成新系统的配置文件##################################
+
 # 生成 fstab 文件
 genfstab -U /mnt > /mnt/etc/fstab
 
-
-
-echo '#############################################################################################################'
-echo '安装完成，现在进入arch-chroot开始配置系统'
-echo '###############################################################################################################\n'
-# 进入 Arch Linux 根文件系统环境
-arch-chroot /mnt /bin/bash << 'EOF'
-# 在这里执行一些命令，比如安装软件包
-echo 'start开始换国内源'
-echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.bfsu.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.bfsu.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.xjtu.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-echo 'Server = https://mirrors.shanghaitech.edu.cn/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
-
-## -------------------------------------------------------------- ##
-### 开启multilib仓库支持
-echo '[multilib]' >> /etc/pacman.conf
-echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
-echo ' ' >> /etc/pacman.conf
-## 增加archlinuxcn源
-echo '[archlinuxcn]' >> /etc/pacman.conf
-echo 'SigLevel = Never' >> /etc/pacman.conf
-echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch' >> /etc/pacman.conf
-## -------------------------------------------------------------- ##
-## 增加arch4edu源
-echo '[arch4edu]' >> /etc/pacman.conf
-echo 'SigLevel = Never' >> /etc/pacman.conf
-echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /etc/pacman.conf
-## 开启pacman颜色支持
-sed -i 's/#Color/Color/g' /etc/pacman.conf
-echo '换源操作结束stop'
-
-
 #设置系统语言为中文
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
+echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen
+echo "zh_CN.UTF-8 UTF-8" >> /mnt/etc/locale.gen
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+# 设置时区
+ln -sf /mnt/usr/share/zoneinfo/Asia/Shanghai /mnt/etc/localtime
 # 设置主机名和hosts
-echo "aw" > /etc/hostname
+echo "aw" > /mnt/etc/hostname
 echo "127.0.0.1   localhost
 ::1         localhost
-127.0.1.1   aw.localdomain aw" >> /etc/hosts
+127.0.1.1   aw.localdomain aw" >> /mnt/etc/hosts
 
-# 设置时区
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-hwclock --systohc
+##############对新系统进行换源操作###############################
+mv /mnt/etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist.back
+echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /mnt/etc/pacman.d/mirrorlist
 
-# 设置 root 密码
-echo "root:aw" | chpasswd
-usermod -s /bin/fish root 
-# 创建用户
-useradd -m -G wheel -s /bin/fish aw
-echo "aw:aw" | chpasswd
-# 给用户添加 sudo 权限
-echo '%wheel ALL=(ALL) ALL' >> /etc/sudoers
-echo 'aw ALL= (ALL) NOPASSWD: ALL' >> /etc/sudoers
-# 创建用户目录
-mkdir -p /home/aw
-chown -R aw:aw /home/aw
+## 开启multilib仓库支持
+echo '[multilib]' >> /mnt/etc/pacman.conf
+echo 'Include = /etc/pacman.d/mirrorlist' >> /mnt/etc/pacman.conf
+echo ' ' >> /mnt/etc/pacman.conf
+## 增加archlinuxcn源
+echo '[archlinuxcn]' >> /mnt/etc/pacman.conf
+echo 'SigLevel = Never' >> /mnt/etc/pacman.conf
+echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch' >> /mnt/etc/pacman.conf
+## -------------------------------------------------------------- ##
+## 增加arch4edu源
+echo '[arch4edu]' >> /mnt/etc/pacman.conf
+echo 'SigLevel = Never' >> /mnt/etc/pacman.conf
+echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/arch4edu/$arch' >> /mnt/etc/pacman.conf
+## 开启pacman颜色支持
+sed -i 's/#Color/Color/g' /mnt/etc/pacman.conf
 
-# 安装引导程序
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH
+
+############################################################################
+############################################################################
+#############生成新系统设置脚本##############################################
+echo "#!/bin/bash" > /mnt/root/set.sh
+#同步时间
+echo "hwclock --systohc" >> /mnt/root/set.sh
+# 中文生效
+echo "locale-gen" >> /mnt/root/set.sh
+#安装引导程序到boot分区
+echo "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH" >> /mnt/root/set.sh
 #修改grub配置文件
-# modprobe.blacklist=iTCO_wdt
-sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 nowatchdog"/g' /etc/default/grub
-sed -i 's/#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/g' /etc/default/grub
+echo "sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\"/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 nowatchdog\"/g' /etc/default/grub" >> /mnt/root/set.sh
+echo "sed -i 's/#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/g' /etc/default/grub" >> /mnt/root/set.sh
 #生成grub配置文件
-grub-mkconfig -o /boot/grub/grub.cfg
+echo "grub-mkconfig -o /boot/grub/grub.cfg" >> /mnt/root/set.sh
+# 设置 root 密码
+echo "echo \"root:aw\" | chpasswd" >> /mnt/root/set.sh
+echo "usermod -s /bin/fish root " >> /mnt/root/set.sh
+# 创建用户
+echo "useradd -m -G wheel -s /bin/fish aw" >> /mnt/root/set.sh
+echo "echo \"aw:aw\" | chpasswd" >> /mnt/root/set.sh
+# 给用户添加 sudo 权限
+echo "echo '%wheel ALL=(ALL) ALL' >> /etc/sudoers" >> /mnt/root/set.sh
+echo "echo 'aw ALL= (ALL) NOPASSWD: ALL' >> /etc/sudoers" >> /mnt/root/set.sh
+# 创建用户目录
+echo "mkdir -p /home/aw" >> /mnt/root/set.sh
+echo "chown -R aw:aw /home/aw" >> /mnt/root/set.sh
 
-# 安装gnome桌面环境、ibus输入法
-pacman -S --noconfirm gnome sdm ibus-libpinyin 
-#安装火狐浏览器
-pacman -S --noconfirm firefox firefox-i18n-zh-cn
 
-echo 'Arch基础系统安装完成！'
 # 设置开机自启的任务
-# 设置网络开机自启
-systemctl enable NetworkManager
-systemctl enable sshd
-systemctl enable cronie
-systemctl enable sdm
+echo "systemctl enable NetworkManager" >> /mnt/root/set.sh
+echo "systemctl enable sshd" >> /mnt/root/set.sh
+echo "systemctl enable cronie" >> /mnt/root/set.sh
+
+
 # 安装archlinuxcn-keyring
-pacman -S --noconfirm archlinuxcn-keyring archlinux-keyring arch4edu-keyring
+echo "#!/bin/bash" > /mnt/root/install_app.sh
+# echo "pacman -S --noconfirm archlinuxcn-keyring archlinux-keyring arch4edu-keyring" >> /mnt/root/install_app.sh
+# 安装gnome桌面环境、ibus输入法
+echo "pacman -S --needed --noconfirm wayland xorg-xwayland xorg-xlsclients glfw-wayland qt5-wayland qt6-wayland " >> /mnt/root/install_app.sh
+echo "pacman -S --noconfirm gnome " >> /mnt/root/install_app.sh
+echo "pacman -S --noconfirm gdm " >> /mnt/root/install_app.sh
+echo "pacman -S --noconfirm ibus-libpinyin " >> /mnt/root/install_app.sh
+echo "pacman -S --noconfirm ibus-rime " >> /mnt/root/install_app.sh
+echo "yay -S --noconfirm ttf-dejavu " >> /mnt/root/install_app.sh  
+echo "systemctl enable gdm" >> /mnt/root/install_app.sh
+#安装火狐浏览器
+echo "pacman -S --noconfirm firefox firefox-i18n-zh-cn" >> /mnt/root/install_app.sh
+chmod a+x /mnt/root/set.sh
+chmod a+x /mnt/root/install_app.sh
 
-
-EOF
-# 使用 exit 命令退出 arch-chroot 环境
-exit
+arch-chroot /mnt /bin/bash /root/set.sh
+echo '###############Set system Done!####################'
+# arch-chroot /mnt /bin/bash /root/install_app.sh
+echo '###############app install Done!####################'
 umount -R /mnt
+reboot
 
 
